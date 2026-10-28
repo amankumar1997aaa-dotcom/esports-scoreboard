@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Scoreboard Admin</title>
+<style>
+:root{color-scheme:dark;--bg:#0b0b0f;--gold:#f0b429;--tx:#f4efe6;--mut:#b9a98d;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:"Oswald","Bebas Neue",Impact,"Arial Narrow",sans-serif;padding:14px}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin:0 auto 10px;max-width:1100px;font-family:system-ui,sans-serif;font-size:13px;align-items:center}
+button{background:var(--gold);color:#000;border:0;border-radius:6px;padding:8px 12px;font-weight:700;cursor:pointer;font-family:system-ui,sans-serif;transition:transform .15s}
+button:hover{transform:scale(1.05)}button.g{background:#2a2218;color:var(--tx)}button.red{background:#7a1f1f;color:#fff}
+.pn{display:flex;border-bottom:1px solid #3a2c12}.pn:empty{display:none}.pn button{flex:1;background:none;color:var(--mut);border-radius:0;padding:10px 4px;border-bottom:2px solid transparent}.pn button.on{color:var(--gold);border-color:var(--gold)}
+#pb{flex:1;overflow:auto;padding:14px}
+#pb input,#pb textarea{background:#1f1810;color:var(--tx);border:1px solid #3a2c12;border-radius:6px;padding:7px;font:inherit;width:100%}
+#pb input:focus,#pb textarea:focus{outline:2px solid var(--gold)}
+#pb label{display:block;color:var(--mut);margin:10px 0 3px;font-size:12px}
+#pb table{width:100%;border-collapse:collapse}#pb th{color:var(--mut);font-size:11px;text-align:left;padding:4px}#pb td{padding:3px}
+#pb td input{text-align:center;padding:6px 2px}#pb td:first-child{max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#pb td:last-child{text-align:center;color:var(--gold);font-weight:700}
+input.dup{outline:2px solid #e5484d!important}
+.mb{display:flex;gap:6px;margin-bottom:10px}.mb button{flex:1}
+.note{color:var(--mut);margin:6px 0}
+.trow{display:flex;gap:8px;align-items:center;background:#1b140c;border:1px solid #3a2c12;border-radius:8px;padding:8px;margin-bottom:8px}
+.lg{width:54px;height:54px;flex:none;background:#000;border:2px dashed #6b4e17;display:flex;align-items:center;justify-content:center;color:var(--gold);cursor:pointer;overflow:hidden;font-size:12px;text-align:center}.lg img{width:100%;height:100%;object-fit:cover}
+.tf{flex:1;display:grid;gap:4px}.two{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.pg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+
+body{font-family:system-ui,sans-serif;font-size:13px;padding:14px}
+[hidden]{display:none!important}
+#wrap{max-width:720px;margin:0 auto}
+.ph{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:6px 0 12px;border-bottom:1px solid #3a2c12;margin-bottom:12px}.ph b{flex:1;color:var(--gold);letter-spacing:1px;font-size:16px}#saved{color:#7bd88f;font-size:12px}
+a.ln{color:var(--gold);text-decoration:none;font-weight:700}
+.livebox{background:#14100a;border:1px solid #3a2c12;border-radius:8px;padding:10px;margin-bottom:12px}
+.livebox .lt{color:var(--gold);letter-spacing:1px;font-weight:700;margin-bottom:6px}
+.lb{display:flex;flex-wrap:wrap;gap:6px}
+#app{background:#14100a;border:1px solid #3a2c12;border-radius:8px}
+.pn{overflow-x:auto}.pn button{white-space:nowrap}
+#pb{padding:14px}
+#pb input[type=checkbox]{width:auto;vertical-align:middle;margin-right:6px}
+#pb input[type=range]{padding:0}
+.lock{text-align:center;padding:28px 6px;background:#14100a;border:1px solid #3a2c12;border-radius:8px}.lock .li{font-size:46px}.lock h3{margin:6px 0;color:var(--gold)}
+.lock input{display:block;width:100%;max-width:320px;margin:8px auto;background:#1f1810;color:var(--tx);border:1px solid #3a2c12;border-radius:6px;padding:10px;font:inherit;text-align:center}
+.lock input:focus{outline:2px solid var(--gold)}
+.err{color:#ff8a8a;min-height:18px}
+.lock code,#pb code{background:#000;padding:1px 5px;border-radius:4px;color:var(--gold)}
+input.dup{outline:2px solid #e5484d!important}
+.shake{animation:shk .4s}@keyframes shk{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+
+</style>
+</head>
+<body>
+<div id="wrap">
+  <div class="ph"><b>⚙ SCOREBOARD ADMIN</b><span id="saved"></span><a class="ln" href="index.html" target="_blank" rel="noopener">Open scoreboard ↗</a><button class="g" id="out" hidden onclick="signOut()">Sign out</button></div>
+  <div id="nocfg" class="lock" hidden><div class="li">🛠</div><h3>Not connected yet</h3><p class="note">Open <code>config.js</code> and fill in <code>databaseURL</code> and <code>apiKey</code> from your Firebase project (see SETUP.md), then reload this page.</p></div>
+  <div id="login" class="lock" hidden><div class="li">🔐</div><h3>Admin sign-in</h3><p class="note">Use the admin email and password you created in Firebase.</p>
+    <input id="em" type="email" placeholder="Admin email" autocomplete="username"><input id="pw" type="password" placeholder="Password" autocomplete="current-password">
+    <div id="lm" class="note err"></div><button onclick="doLogin()">Sign in</button></div>
+  <div id="livebox" class="livebox" hidden><div class="lt">ON-SCREEN CONTROL</div><div class="note" style="margin:0 0 8px">Tap to change what the public scoreboard shows, right now.</div><div class="lb" id="lb"></div></div>
+  <div id="app" hidden><div class="pn" id="pn"></div><div id="pb"></div></div>
+</div>
+<script src="config.js"></script>
+<script>
+
+const $=id=>document.getElementById(id);
+const CFG=window.CFG||{},DB=(CFG.databaseURL||'').replace(/\/+$/,''),AK=CFG.apiKey||'',SK='esports_admin_session';
+const NAMES=Array.from({length:30},(_,i)=>'Player '+(i+1));
+const defaults=()=>({title:'Battle Royale',event:'YOUR EVENT NAME',org:'Organised by Your College',maps:['Bermuda','Purgatory','Kalahari'],subs:['','','','','',''],
+  teams:NAMES.map(n=>({name:n,logo:'',p:[n]})),
+  d:[0,1,2].map(()=>({rank:NAMES.map((_,i)=>i+1),k:NAMES.map(()=>[''])})),pp:[12,9,8,7,6,5,4,3,2,1].concat(Array(20).fill(0)),kp:1,mvpN:10,
+  rules:'Total points = placement points + kill points from all 3 maps.\nTie-break: most Booyahs → most kills → most placement points.\nMVP = the player with the most eliminations across all maps.',
+  bg:{on:true,url:(CFG.background!==undefined?CFG.background:'bg.png'),dim:55}});
+function norm(o){const d=defaults(),s=Object.assign(d,o||{});s.bg=Object.assign({},d.bg,s.bg||{});delete s.vid;s.teams=s.teams.slice(0,30).map(t=>({name:t.name,logo:t.logo||'',p:[t.name]}));s.d=s.d.map(m=>({rank:m.rank.slice(0,30),k:m.k.slice(0,30).map(a=>[String((a||[]).reduce((x,v)=>x+(parseInt(v)||0),0)||'')])}));return s}
+let S=defaults(),cur=0,sec=0,armed=null,liveTab=0,sess=null;
+const esc=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+const ini=n=>n.split(/\s+/).map(w=>w[0]||'').join('').slice(0,3).toUpperCase();
+const NT=()=>S.teams.length;
+const kills=(m,i)=>S.d[m].k[i].reduce((a,v)=>a+(parseInt(v)||0),0);
+const place=(m,i)=>{const r=S.d[m].rank[i];return r>=1&&r<=NT()?(S.pp[r-1]||0):0};
+const mpts=(m,i)=>place(m,i)+kills(m,i)*S.kp;
+const cls=r=>r>=1&&r<=3?' r'+r:'';
+const logo=t=>`<div class="logo">${t.logo?`<img src="${t.logo}" alt="">`:esc(ini(t.name))}</div>`;
+const subOf=i=>S.subs[i]||(i<3?`Match ${i+1} · ${S.maps[i]}`:['','','','Final Standings','MVP Players','Point System'][i]);
+const hdr=()=>{},tabs=()=>liveBar();
+
+/* ---------- sign-in (Firebase Auth, email + password) ---------- */
+function loadSess(){try{sess=JSON.parse(localStorage.getItem(SK))}catch(e){sess=null}}
+function storeSess(){try{sess?localStorage.setItem(SK,JSON.stringify(sess)):localStorage.removeItem(SK)}catch(e){}}
+const AUTHERR={INVALID_LOGIN_CREDENTIALS:'Wrong email or password',INVALID_PASSWORD:'Wrong email or password',EMAIL_NOT_FOUND:'Wrong email or password',INVALID_EMAIL:'Enter a valid email',TOO_MANY_ATTEMPTS_TRY_LATER:'Too many attempts — wait a few minutes and try again',USER_DISABLED:'This account is disabled'};
+async function doLogin(){const m=$('lm'),em=$('em').value.trim(),pw=$('pw').value;m.textContent='';if(!em||!pw){m.textContent='Enter your email and password';return}
+  try{const r=await fetch('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key='+encodeURIComponent(AK),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:em,password:pw,returnSecureToken:true})});
+    const d=await r.json();if(!r.ok){const c=String((d.error&&d.error.message)||'').split(' ')[0];throw new Error(AUTHERR[c]||'Sign-in failed ('+(c||r.status)+')')}
+    sess={idToken:d.idToken,refreshToken:d.refreshToken,exp:Date.now()+(+d.expiresIn)*1000};storeSess();$('pw').value='';start()}
+  catch(e){m.textContent=e.message;const f=$('pw');f.classList.remove('shake');void f.offsetWidth;f.classList.add('shake')}}
+async function token(){if(!sess)throw new Error('Not signed in');
+  if(Date.now()>sess.exp-120000){const r=await fetch('https://securetoken.googleapis.com/v1/token?key='+encodeURIComponent(AK),{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'grant_type=refresh_token&refresh_token='+encodeURIComponent(sess.refreshToken)});
+    const d=await r.json();if(!r.ok){sess=null;storeSess();showLogin();throw new Error('Session expired — sign in again')}
+    sess={idToken:d.id_token,refreshToken:d.refresh_token,exp:Date.now()+(+d.expires_in)*1000};storeSess()}
+  return sess.idToken}
+function signOut(){sess=null;storeSess();location.reload()}
+function showLogin(){$('app').hidden=true;$('livebox').hidden=true;$('login').hidden=false;$('out').hidden=true}
+
+/* ---------- cloud ---------- */
+async function put(path,body,method){const t=await token();
+  const r=await fetch(DB+path+'.json?auth='+encodeURIComponent(t),{method:method||'PUT',body:JSON.stringify(body)});
+  if(!r.ok)throw new Error(r.status===401||r.status===403?'Permission denied — check the database rules and the email you signed in with':'Save failed ('+r.status+')')}
+let saveT,saving=false,dirty=false;
+function save(){dirty=true;$('saved').textContent='Saving…';clearTimeout(saveT);saveT=setTimeout(flush,500)}
+async function flush(){if(!dirty||saving)return;dirty=false;saving=true;
+  try{await put('/state',JSON.stringify(S));await put('/meta',{ts:Date.now()},'PATCH');$('saved').textContent='✓ Saved · live on screens'}
+  catch(e){$('saved').textContent='⚠ '+e.message;saving=false;return}
+  saving=false;if(dirty){clearTimeout(saveT);flush()}}
+function update(){save()}
+async function loadCloud(){
+  const r=await fetch(DB+'/state.json',{cache:'no-store'});if(!r.ok)throw new Error('Could not read the database ('+r.status+')');
+  const s=await r.json();S=typeof s==='string'?norm(JSON.parse(s)):defaults();
+  try{const m=await (await fetch(DB+'/meta.json',{cache:'no-store'})).json();if(m&&typeof m.tab==='number')liveTab=m.tab}catch(e){}}
+async function reload(){try{await loadCloud();pRender();liveBar();$('saved').textContent='✓ Loaded from cloud'}catch(e){$('saved').textContent='⚠ '+e.message}}
+
+/* ---------- on-screen control ---------- */
+function liveBar(){const L=[...S.maps.map((m,i)=>[i,`MAP ${i+1} · ${m}`]),[3,'🏆 FINAL'],[4,'⭐ MVP'],[5,'📊 POINTS']];
+  $('lb').innerHTML=L.map(([i,l])=>`<button class="${liveTab===i?'':'g'}" onclick="liveGo(${i})">${esc(l)}</button>`).join('')+
+  `<button class="g" onclick="liveAct('replay')">▶ Replay</button><button class="g" onclick="liveAct('rev')">🏁 Reveal</button><button class="g" onclick="liveAct('conf')">🎉 Celebrate</button>`}
+async function liveSend(o){try{await put('/meta',Object.assign({tab:liveTab,act:''},o,{n:Date.now()}),'PATCH');$('saved').textContent='✓ Sent to screens'}catch(e){$('saved').textContent='⚠ '+e.message}}
+function liveGo(i){liveTab=i;liveBar();liveSend({tab:i,act:''})}
+function liveAct(a){liveSend({tab:liveTab,act:a})}
+
+/* ---------- editor ---------- */
+function go(i){cur=i;pRender()}
+const SECS=['Match','Players','Event','Points','Background','Data'];
+function pRender(){
+  $('pn').innerHTML=SECS.map((s,i)=>`<button class="${sec===i?'on':''}" onclick="sec=${i};pRender()">${s}</button>`).join('');
+  $('pb').innerHTML=[pMatch,pTeams,pEvent,pPoints,pBackground,pData][sec]();dup()}
+const mapBtns=()=>`<div class="mb">${S.maps.map((m,i)=>`<button class="${cur===i?'':'g'}" onclick="go(${i})">${esc(m)}</button>`).join('')}</div>`;
+function pMatch(){
+  if(cur>2)return mapBtns()+`<p class="note">Final, MVP and Point System tabs are calculated automatically. Pick a map above to enter results.</p>`;
+  const m=S.d[cur];
+  return mapBtns()+`<p class="note">Entering: <b style="color:var(--gold)">${esc(S.maps[cur])}</b>. Press <b>Enter</b> to jump to the next player. The scoreboard updates live.</p>
+  <table><tr><th>Player</th><th>Rank</th><th>Kills</th><th>Pts</th></tr>
+  ${S.teams.map((t,i)=>`<tr><td title="${esc(t.name)}">${esc(t.name)}</td>
+   <td><input class="rk" type="number" min="1" value="${m.rank[i]>=99?'':m.rank[i]}" oninput="setR(${i},this.value)"></td>
+   <td><input type="number" min="0" value="${m.k[i][0]}" oninput="setK(${i},0,this.value)"></td>
+   <td id="pp${i}">${mpts(cur,i)}</td></tr>`).join('')}</table>
+  <label>⚡ Quick paste — one line per player: <code>player rank kills</code> (e.g. <code>Player 1 1 6</code>)</label>
+  <textarea id="qp" rows="5" placeholder="Player 1 1 6&#10;Player 2 2 4"></textarea>
+  <div class="mb" style="margin-top:6px"><button onclick="quick()">Apply</button><button class="g" onclick="clr(this)">Clear this map</button></div><div id="qs" class="note"></div>`;
+}
+function setR(i,v){S.d[cur].rank[i]=parseInt(v)||99;pp(i);dup();update()}
+function setK(i,j,v){S.d[cur].k[i][j]=v;pp(i);update()}
+function pp(i){const e=$('pp'+i);if(e)e.textContent=mpts(cur,i)}
+function quick(){let ok=0,bad=[];
+  $('qp').value.split('\n').forEach(l=>{l=l.trim();if(!l)return;const t=l.split(/[\s,\t|]+/),n=t.slice(-2).map(Number);if(t.length<3||n.some(isNaN)){bad.push(l);return}
+    const nm=t.slice(0,-2).join(' ').toLowerCase();let i=S.teams.findIndex(x=>x.name.toLowerCase()===nm);if(i<0)i=S.teams.findIndex(x=>x.name.toLowerCase().startsWith(nm));if(i<0)i=S.teams.findIndex(x=>x.name.toLowerCase().includes(nm));
+    if(i<0){bad.push(l);return}S.d[cur].rank[i]=n[0];S.d[cur].k[i]=[String(n[1])];ok++});
+  pRender();update();$('qs').innerHTML=`✓ ${ok} player(s) updated.`+(bad.length?`<br><span style="color:#ff8a8a">Not matched: ${bad.map(esc).join(' | ')}</span>`:'')}
+function pTeams(){return `<p class="note">Player names and logos are shared across all maps, the Final and the MVP tab.</p>`+S.teams.map((t,i)=>`<div class="trow">
+  <div class="lg" onclick="upl(${i})">${t.logo?`<img src="${t.logo}" alt="">`:'+ logo'}</div>
+  <div class="tf"><input value="${esc(t.name)}" placeholder="Player name" oninput="S.teams[${i}].name=this.value;S.teams[${i}].p[0]=this.value;update()"></div>
+  <button class="g" title="Remove logo" onclick="S.teams[${i}].logo='';pRender();update()">🖼✕</button>
+  <button class="red" onclick="delT(${i},this)">✕</button></div>`).join('')+`<button onclick="addT()">+ Add player (max 30)</button>`}
+function addT(){if(NT()>=30){alert('Maximum 30 players');return}const n='Player '+(NT()+1);S.teams.push({name:n,logo:'',p:[n]});S.d.forEach(m=>{m.rank.push(99);m.k.push([''])});while(S.pp.length<NT())S.pp.push(0);pRender();update()}
+function delT(i,b){arm('d'+i,()=>{S.teams.splice(i,1);S.d.forEach(m=>{m.rank.splice(i,1);m.k.splice(i,1)});pRender();update()},b)}
+function upl(i){const f=document.createElement('input');f.type='file';f.accept='image/*';f.onchange=()=>{const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const c=document.createElement('canvas'),s=Math.min(1,160/Math.max(im.width,im.height));c.width=im.width*s;c.height=im.height*s;c.getContext('2d').drawImage(im,0,0,c.width,c.height);S.teams[i].logo=c.toDataURL('image/png');pRender();update()};im.src=r.result};r.readAsDataURL(f.files[0])};f.click()}
+function pEvent(){const f=(l,k,i)=>`<label>${l}</label><input value="${esc(i===undefined?S[k]:S[k][i])}" oninput="${i===undefined?`S.${k}=this.value`:`S.${k}[${i}]=this.value`};hdr();tabs();save()">`;
+  return f('Main title','title')+f('Event name','event')+f('Organiser line','org')+`<label style="margin-top:16px;color:var(--gold)">MAP NAMES</label>`+S.maps.map((m,i)=>f('Map '+(i+1),'maps',i)).join('')+
+  `<label style="margin-top:16px;color:var(--gold)">SUBTITLE OVERRIDES (blank = automatic)</label>`+S.maps.map((m,i)=>f('Map '+(i+1)+' subtitle','subs',i)).join('')+f('Final subtitle','subs',3)+f('MVP subtitle','subs',4)+f('Point System subtitle','subs',5)+
+  `<label style="margin-top:16px;color:var(--gold)">MVP TAB</label><label>Players shown</label><input type="number" min="1" max="${NT()}" value="${S.mvpN}" oninput="S.mvpN=parseInt(this.value)||10;update()">`}
+function pPoints(){return `<p class="note">Used for the FINAL and shown on the Point System tab.</p><label>Placement points (1st → ${NT()}th)</label><div class="pg">${Array.from({length:NT()},(_,i)=>`<div><small style="color:var(--mut)">#${i+1}</small><input type="number" value="${S.pp[i]||0}" oninput="S.pp[${i}]=parseInt(this.value)||0;update()"></div>`).join('')}</div>
+  <label>Points per kill</label><input type="number" value="${S.kp}" oninput="S.kp=parseInt(this.value)||0;update()">
+  <label>Rules text shown on the Point System tab (one rule per line)</label><textarea rows="6" oninput="S.rules=this.value;update()">${esc(S.rules)}</textarea>`}
+function dup(){const r=[...document.querySelectorAll('input.rk')],c={};r.forEach(e=>{if(e.value)c[e.value]=(c[e.value]||0)+1});r.forEach(e=>e.classList.toggle('dup',!!e.value&&(c[e.value]>1||+e.value>NT())))}
+function arm(id,fn,btn){if(armed===id){armed=null;fn()}else{armed=id;btn.textContent='Click again to confirm';setTimeout(()=>{if(armed===id){armed=null;pRender()}},3000)}}
+function clr(b){arm('clr',()=>{S.d[cur]={rank:S.teams.map((_,i)=>i+1),k:S.teams.map(()=>[''])};pRender();update()},b)}
+function pBackground(){const v=S.bg;return `<p class="note">An image shown behind the scoreboard. Use a file path inside your site (e.g. <code>bg.png</code>) or a direct link to an image. Leave it empty for no image.</p>
+  <label><input type="checkbox" ${v.on!==false?'checked':''} onchange="S.bg.on=this.checked;update()"> Show background image</label>
+  <label>Image path or link</label><input value="${esc(v.url)}" placeholder="bg.png" oninput="S.bg.url=this.value;update()">
+  <label>Darkness over the image: <b id="dv">${v.dim}</b>%</label><input type="range" min="0" max="90" value="${v.dim}" oninput="S.bg.dim=+this.value;$('dv').textContent=this.value;update()">`}
+function pData(){return `<p class="note">Everything saves to the cloud automatically. Use a backup to keep a copy, or to bring in data from the old single-file scoreboard: paste its backup text below and click Import.</p>
+  <button onclick="$('bk').value=JSON.stringify(S);$('bk').select();document.execCommand('copy')">📋 Export / copy backup</button>
+  <textarea id="bk" rows="7" style="margin-top:8px" placeholder="Backup text appears here. To restore, paste it here and click Import."></textarea>
+  <div class="mb" style="margin-top:8px"><button class="g" onclick="imp()">⬆ Import backup</button><button class="g" onclick="reload()">⟳ Reload from cloud</button><button class="red" onclick="rst(this)">Reset everything</button></div><div id="is" class="note"></div>`}
+function imp(){try{S=norm(JSON.parse($('bk').value));save();go(0);liveBar();$('is').textContent='✓ Imported'}catch(e){$('is').textContent='⚠ Invalid backup text'}}
+function rst(b){arm('rst',()=>{S=defaults();save();go(0);liveBar()},b)}
+$('pb').addEventListener('keydown',e=>{if(e.key!=='Enter'||e.target.tagName!=='INPUT')return;const td=e.target.closest('td');if(!td)return;const tr=td.parentElement.nextElementSibling;if(tr){const i=[...td.parentElement.children].indexOf(td),n=tr.children[i].querySelector('input');if(n){n.focus();n.select()}}});
+$('pw').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
+
+/* ---------- start ---------- */
+async function start(){
+  try{$('login').hidden=true;await loadCloud();$('app').hidden=false;$('livebox').hidden=false;$('out').hidden=false;pRender();liveBar();$('saved').textContent=''}
+  catch(e){$('saved').textContent='⚠ '+e.message;showLogin()}}
+if(!DB||!AK){$('nocfg').hidden=false}
+else{loadSess();sess?start():showLogin()}
+
+</script>
+</body>
+</html>
